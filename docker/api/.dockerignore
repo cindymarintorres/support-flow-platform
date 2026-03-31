@@ -1,0 +1,15 @@
+node_modules
+dist
+.env
+.env.*
+!.env.example
+prisma/migrations/*.sql   # opcional, depende si los corres en entrypoint
+*.log
+coverage
+.git
+.gitignore
+.vscode
+.idea
+.agent
+.env
+    
