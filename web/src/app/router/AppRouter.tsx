@@ -6,7 +6,7 @@ import AuthLayout from '../../components/layout/AuthLayout'
 
 // Pages — importar cuando existan
 import LoginPage from '../../pages/auth/LoginPage'
-import TicketsPage from '../../pages/tickets/TicketsPage'
+// import TicketsPage from '../../pages/tickets/TicketsPage'
 // import TicketDetailPage from '@/pages/tickets/TicketDetailPage'
 // import CreateTicketPage from '@/pages/tickets/CreateTicketPage'
 // import DashboardPage from '@/pages/dashboard/DashboardPage'

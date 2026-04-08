@@ -1,7 +1,13 @@
 import { PrismaClient, UserRole } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
+import { Pool } from 'pg';
 import * as bcrypt from 'bcrypt';
+import 'dotenv/config';
 
-const prisma = new PrismaClient();
+const url = process.env.DATABASE_URL;
+const pool = new Pool({ connectionString: url });
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({ adapter });
 
 async function main() {
   const password = await bcrypt.hash('Admin1234!', 10);
@@ -16,7 +22,7 @@ async function main() {
       email: 'admin@supportflow.dev',
       name: 'Admin User',
       password,
-      role: UserRole.ADMIN,
+      role: UserRole.ADMINISTRADOR,
     },
   });
 
@@ -27,7 +33,7 @@ async function main() {
       email: 'agent@supportflow.dev',
       name: 'Agent User',
       password: agentPassword,
-      role: UserRole.AGENT,
+      role: UserRole.AGENTE,
     },
   });
 
@@ -38,7 +44,7 @@ async function main() {
       email: 'requester@supportflow.dev',
       name: 'Requester User',
       password: requesterPassword,
-      role: UserRole.REQUESTER,
+      role: UserRole.SOLICITANTE,
     },
   });
 

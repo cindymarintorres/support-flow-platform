@@ -13,7 +13,7 @@ RUN npm install --legacy-peer-deps
 
 COPY api/ .
 
-RUN npx prisma generate
+# Generación de Prisma movida al flujo de ejecución posterior para soportar variables de entorno dinámicas.
 
 EXPOSE 3000
 
