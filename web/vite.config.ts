@@ -1,23 +1,35 @@
-import { defineConfig } from 'vite'
+import path from "path"
+import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 
-//const isDev = process.env.NODE_ENV === 'development';
-const proxyTarget = process.env.VITE_PROXY_TARGET;
+export default defineConfig(({ mode }) => {
+  // Carga las variables de entorno basadas en el modo (dev, prod, etc.)
+  // El tercer parámetro '' carga todas las variables sin importar el prefijo VITE_
+  const env = loadEnv(mode, process.cwd(), '');
 
-export default defineConfig({
-  plugins: [react()],
-  server: {
-    host: '0.0.0.0',
-    port: 5173,
-    proxy: {
-      '/api': {
-        target: proxyTarget ?? 'http://mockserver:1080',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
-      }
+  return {
+    plugins: [react()],
+    resolve: {
+      alias: {
+        "@": path.resolve(__dirname, "./src"),
+      },
     },
-    watch: {
-      usePolling: true,
+    server: {
+      host: '0.0.0.0',
+      port: 5173,
+      proxy: {
+        '/api': {
+          // Usamos la variable cargada o el fallback
+          target: env.VITE_PROXY_TARGET || 'http://localhost:3000', 
+          changeOrigin: true,
+          // REVISA ESTO: NestJS suele tener el prefijo /api en sus rutas.
+          // Si tu backend ya espera /api/tickets, NO uses el rewrite.
+          // rewrite: (path) => path.replace(/^\/api/, ''), 
+        }
+      },
+      watch: {
+        usePolling: true, // Excelente para Docker en Windows/Mac
+      },
     },
-  },
+  }
 })
