@@ -53,16 +53,16 @@ services:
     environment:
       NODE_ENV: ${NODE_ENV:-development}
       PORT: ${API_PORT:-3000}
-      DATABASE_URL: ${DATABASE_URL}
+      #Aquí forzamos la conexión interna de Docker
+      DATABASE_URL: ${DATABASE_URL_DOCKER}
       REDIS_HOST: redis
       REDIS_PORT: 6379
       MAIL_HOST: mailpit
       MAIL_PORT: 1025
-      MOCKSERVER_URL: http://mockserver:1080
+      MOCKSERVER_URL: ${MOCKSERVER_URL}
       JWT_SECRET: ${JWT_SECRET}
     volumes:
       - ./api:/app
-      - /app/node_modules
     networks:
       - sf_network
     healthcheck:
@@ -90,7 +90,6 @@ services:
       #VITE_API_URL: http://localhost:${BACKEND_PORT:-3000}
     volumes:
       - ./web:/app
-      - /app/node_modules
     networks:
       - sf_network
     healthcheck:

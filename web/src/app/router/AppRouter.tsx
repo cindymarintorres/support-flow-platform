@@ -38,7 +38,7 @@ const AppRouter = () => (
 
       {/*FALLBACK (Cualquier ruta que no exista) */}
       {/* Te manda a la raíz "/", y la raíz evaluará si tienes sesión o no */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   </BrowserRouter>
 )

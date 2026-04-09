@@ -2,29 +2,25 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link } from 'react-router-dom';
-import { Eye, EyeOff, Mail, Lock, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 
-import { LoginSchema, type LoginDto } from '../schemas/auth.schema';
-import { useAuth } from '../hooks/useAuth';
+import { LoginSchema, type LoginDto } from '../auth.schema';
+import { useAuth } from '../useAuth';
 
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-//Importamos los componentes del nuevo Input Group
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
+import { AppInput } from '@/components/common/AppInput';
+import { AppButton } from '@/components/common/AppButton';
+import logo from '@/assets/img/logo/logo-support-flow-v2.png';
 
 export const LoginForm = () => {
-  const { login, isLoading, error } = useAuth();
-  const [showPassword, setShowPassword] = useState(false);
+  const { login, isLoading, error } = useAuth()
+  const [showPassword, setShowPassword] = useState(false)
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginDto>({
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginDto>({
     resolver: zodResolver(LoginSchema),
     defaultValues: { email: '', password: '' },
-  });
+  })
 
   const onSubmit = (data: LoginDto) => {
     login(data);
@@ -33,93 +29,49 @@ export const LoginForm = () => {
   return (
     <div className="w-full max-w-md bg-white rounded-2xl shadow-sm border border-slate-100 p-8">
       <div className="text-center mb-8">
+        <img src={logo} alt="Logo" className="w-70 mx-auto mb-4" />
         <h2 className="text-2xl font-semibold text-slate-900 mb-2">Iniciar Sesión</h2>
-        <p className="text-sm text-slate-500">
-          Bienvenido de nuevo a SupportFlow
-        </p>
+        {/* <p className="text-sm text-slate-500">Bienvenido de nuevo a SupportFlow</p> */}
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-        
-        {/* Campo: Correo Electrónico */}
-        <div className="space-y-2">
-          <Label htmlFor="email" className={errors.email ? "text-red-500" : ""}>
-            Correo electrónico
-          </Label>
-          
-          {/* ✅ FORMA OFICIAL DE SHADCN */}
-          <InputGroup>
-            <InputGroupInput
-              id="email"
-              type="email"
-              placeholder="ejemplo@empresa.com"
-              {...register('email')}
-              className={errors.email ? "border-red-500 focus-visible:ring-red-500" : ""} 
-            />
-            <InputGroupAddon align="inline-start">
-              <Mail className="h-4 w-4 text-slate-400" />
-            </InputGroupAddon>
-          </InputGroup>
 
-          {errors.email && (
-            <p className="text-xs text-red-500 font-medium">{errors.email.message}</p>
-          )}
-        </div>
+        <AppInput
+          id="email"
+          label="Correo electrónico"
+          leftIcon={Mail}
+          type="email"
+          placeholder="ejemplo@empresa.com"
+          error={errors.email?.message}
+          {...register('email')}
+        />
 
-        {/* Campo: Contraseña */}
-        <div className="space-y-2">
-          <Label htmlFor="password" className={errors.password ? "text-red-500" : ""}>
-            Contraseña
-          </Label>
-          
-          {/* ✅ INPUT GROUP CON DOBLE ADDON (Candado y Ojo) */}
-          <InputGroup>
-            <InputGroupInput
-              id="password"
-              type={showPassword ? 'text' : 'password'}
-              placeholder="••••••••"
-              {...register('password')}
-              className={errors.password ? "border-red-500 focus-visible:ring-red-500" : ""}
-            />
-            {/* Ícono de la izquierda */}
-            <InputGroupAddon align="inline-start">
-              <Lock className="h-4 w-4 text-slate-400" />
-            </InputGroupAddon>
-            
-            {/* Botón de la derecha */}
-            <InputGroupAddon align="inline-end">
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="text-slate-400 hover:text-slate-600 transition-colors focus:outline-none focus:text-slate-900"
-              >
-                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
-            </InputGroupAddon>
-          </InputGroup>
+        <AppInput
+          id="password"
+          label="Contraseña"
+          leftIcon={Lock}
+          rightIcon={showPassword ? EyeOff : Eye}
+          onIconClick={() => setShowPassword(!showPassword)}
+          type={showPassword ? 'text' : 'password'}
+          placeholder="••••••••"
+          error={errors.password?.message}
+          {...register('password')}
+        />
 
-          {errors.password && (
-            <p className="text-xs text-red-500 font-medium">{errors.password.message}</p>
-          )}
-        </div>
-
-        {/* Opciones extras */}
+        {/* Recordarme y olvidé contraseña — esto se queda directo, no vale la pena abstraerlo */}
         <div className="flex items-center justify-between mt-2">
-          <div className="flex items-center space-x-2 cursor-pointer">
+          <div className="flex items-center space-x-2">
             <Checkbox id="remember" />
-            <Label htmlFor="remember" className="text-sm font-normal text-slate-600 cursor-pointer hover:text-slate-900 transition-colors">
+            <Label htmlFor="remember" className="text-sm font-normal text-slate-600 cursor-pointer">
               Recordarme
             </Label>
           </div>
-
-          <Link 
-            to="/forgot-password" 
-            className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
-          >
+          <Link to="/forgot-password" className="text-sm font-medium text-blue-600 hover:text-blue-700">
             Olvidé mi contraseña
           </Link>
         </div>
 
+        {/* Error del servidor */}
         {/* Mensaje de error desde NestJS */}
         {error && (
           <div className="p-3 bg-red-50 rounded-lg border border-red-100">
@@ -130,22 +82,16 @@ export const LoginForm = () => {
           </div>
         )}
 
-        {/* Botón */}
-        <Button 
-          type="submit" 
-          className="w-full mt-6 bg-[#60B6C1] hover:bg-[#4ea2ac] text-white" 
-          disabled={isLoading}
+        <AppButton
+          type="submit"
+          className="w-full mt-6 bg-[#60B6C1] hover:bg-[#4ea2ac] text-white"
+          isLoading={isLoading}
+          loadingText="Iniciando sesión..."
         >
-          {isLoading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Iniciando sesión...
-            </>
-          ) : (
-            'Iniciar Sesión'
-          )}
-        </Button>
+          Iniciar Sesión
+        </AppButton>
+
       </form>
     </div>
-  );
-};
+  )
+}
