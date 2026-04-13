@@ -34,20 +34,32 @@ enum CommentType {
 }
 
 model User {
-  id              String          @id @default(uuid())
-  name            String
-  email           String          @unique
-  password        String
-  role            UserRole        @default(SOLICITANTE)
-  isActive        Boolean         @default(true)
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  ticketsCreated  Ticket[]        @relation("CreatedBy")
-  ticketsAssigned Ticket[]        @relation("AssignedTo")
-  comments        TicketComment[]
-  history         TicketHistory[]
+  id                  String               @id @default(uuid())
+  name                String
+  email               String               @unique
+  password            String
+  role                UserRole             @default(SOLICITANTE)
+  isActive            Boolean              @default(true)
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  ticketsCreated      Ticket[]             @relation("CreatedBy")
+  ticketsAssigned     Ticket[]             @relation("AssignedTo")
+  comments            TicketComment[]
+  history             TicketHistory[]
+  passwordResetTokens PasswordResetToken[]
 
   @@map("users")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@map("password_reset_tokens")
 }
 
 model Ticket {

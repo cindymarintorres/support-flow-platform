@@ -49,7 +49,7 @@ async function main() {
   });
 
   // Crear Categorías
-  const categories = [
+  /*const categories = [
     { name: 'Infrastructure', description: 'Problemas de servidores, redes, accesos' },
     { name: 'Software', description: 'Bugs, errores de aplicación, actualizaciones' },
     { name: 'Security', description: 'Incidentes de seguridad, accesos no autorizados' },
@@ -61,7 +61,7 @@ async function main() {
       update: {},
       create: cat,
     });
-  }
+  }*/
 
   console.log('Seed completed successfully');
 }
