@@ -2,7 +2,7 @@
 # docker/api/Dockerfile
 FROM cemarin/nest-base:20-alpine
 
-RUN apk add --no-cache openssl libc6-compat
+RUN apk add --no-cache openssl libc6-compat wget
 
 WORKDIR /app
 

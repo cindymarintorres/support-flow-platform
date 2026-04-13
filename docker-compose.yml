@@ -1,4 +1,4 @@
-# docker-compose.yml — SupportFlow
+# docker-compose.yml — SupportFlow (Optimizado para Dev)
 
 services:
   postgres:
@@ -19,7 +19,7 @@ services:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-support_flow}"]
       interval: 10s
       timeout: 5s
-      retries: 10
+      retries: 5 # Reducido para no esperar en vano si falla rápido
 
   redis:
     image: redis:7-alpine
@@ -33,13 +33,13 @@ services:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
-      retries: 10
+      retries: 5
     volumes:
       - redis_data:/data  
 
   api:
     build:
-      context: . #El dockerfile debe ser relativo al context, o usa path absoluto desde la raíz
+      context: .
       dockerfile: ./docker/api/Dockerfile
     container_name: sf_api
     restart: unless-stopped
@@ -53,7 +53,6 @@ services:
     environment:
       NODE_ENV: ${NODE_ENV:-development}
       PORT: ${API_PORT:-3000}
-      #Aquí forzamos la conexión interna de Docker
       DATABASE_URL: ${DATABASE_URL_DOCKER}
       REDIS_HOST: redis
       REDIS_PORT: 6379
@@ -63,40 +62,42 @@ services:
       JWT_SECRET: ${JWT_SECRET}
     volumes:
       - ./api:/app
+      #- /app/node_modules # Evita sobreescribir los módulos de Linux con los de tu host (importante para bcrypt/prisma)
     networks:
       - sf_network
     healthcheck:
-      #test: ["CMD-SHELL", "wget -qO- http://localhost:3000/health |
-      test: ["CMD-SHELL", "nc -z localhost 3000 || exit 1"]
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/api/health || exit 1"]
       interval: 15s
       timeout: 5s
-      retries: 10
+      retries: 5
+      start_period: 60s #Da 60 segundos a NestJS para compilar sin reportar error fatal
 
   web:
     build:
-      context: . #El dockerfile debe ser relativo al context, o usa path absoluto desde la raíz
+      context: .
       dockerfile: ./docker/web/Dockerfile
     container_name: sf_web
     restart: unless-stopped
     depends_on:
       api:
-        condition: service_healthy
+        condition: service_started #React arranca apenas el contenedor de API inicie, sin esperar a que Nest compile
     ports:
       - "${WEB_PORT:-3001}:5173"
     environment:
       NODE_ENV: ${NODE_ENV:-development}
-      #VITE_HOST: 0.0.0.0
-      #VITE_PORT: 5173
-      #VITE_API_URL: http://localhost:${BACKEND_PORT:-3000}
+      VITE_API_URL: http://localhost:${API_PORT:-3000} # Habilitado para que Vite sepa dónde hablar
     volumes:
       - ./web:/app
+      - /app/node_modules # Igual que en API, protege dependencias nativas
     networks:
       - sf_network
+    # El healthcheck en Vite de dev no es estrictamente necesario, pero lo mantenemos con start_period
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:5173 || exit 1"]
       interval: 15s
       timeout: 5s
-      retries: 10
+      retries: 5
+      start_period: 30s
 
   mailpit:
     image: axllent/mailpit:latest
