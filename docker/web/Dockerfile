@@ -4,6 +4,10 @@ FROM cemarin/react-vite-base:20-alpine
 
 WORKDIR /app
 
+# Copiamos shared primero, paquetes compartidos de schemas
+COPY shared/ /shared/
+RUN cd /shared && npm install
+
 COPY web/package*.json ./
 
 RUN npm install --legacy-peer-deps

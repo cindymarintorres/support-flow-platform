@@ -6,6 +6,10 @@ RUN apk add --no-cache openssl libc6-compat wget
 
 WORKDIR /app
 
+# Copiamos shared primero, paquetes compartidos de schemas
+COPY shared/ /shared/
+RUN cd /shared && npm install
+
 COPY api/package*.json ./
 COPY api/prisma ./prisma/
 
