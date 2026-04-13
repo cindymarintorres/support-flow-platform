@@ -17,7 +17,8 @@
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@support-flow/shared": ["../shared/src/index.ts"]
     }
   },
   "include": ["src"],

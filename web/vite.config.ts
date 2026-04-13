@@ -13,7 +13,8 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),
-      },  
+        "@support-flow/shared": path.resolve(__dirname, "../shared/src/index.ts"), //paquete de schemas compartidos
+      },
     },
     server: {
       host: '0.0.0.0',
@@ -21,7 +22,7 @@ export default defineConfig(({ mode }) => {
       proxy: {
         '/api': {
           // Usamos la variable cargada o el fallback
-          target: env.VITE_PROXY_TARGET || 'http://localhost:3000', 
+          target: env.VITE_PROXY_TARGET || 'http://localhost:3000',
           changeOrigin: true,
           // REVISA ESTO: NestJS suele tener el prefijo /api en sus rutas.
           // Si tu backend ya espera /api/tickets, NO uses el rewrite.
