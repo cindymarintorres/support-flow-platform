@@ -60,10 +60,12 @@ services:
       MAIL_PORT: 1025
       MOCKSERVER_URL: ${MOCKSERVER_URL}
       JWT_SECRET: ${JWT_SECRET}
+      FRONTEND_URL: http://localhost:${WEB_PORT:-3001} # Habilitado para NestJS en el envio de correos
     volumes:
       - ./api:/app
-      - ./shared:/shared    #paquete de schemas compartidos
-      #- /app/node_modules # Evita sobreescribir los módulos de Linux con los de tu host (importante para bcrypt/prisma)
+      - ./shared:/shared    # Paquete de schemas compartidos
+      - /app/dist         # Evita conflictos de compilación con tu host
+      - /app/node_modules # Evita sobreescribir los módulos de Linux con los de tu host (importante para bcrypt/prisma)
     networks:
       - sf_network
     healthcheck:
@@ -87,11 +89,10 @@ services:
     environment:
       NODE_ENV: ${NODE_ENV:-development}
       VITE_API_URL: http://localhost:${API_PORT:-3000} # Habilitado para que Vite sepa dónde hablar
-      FRONTEND_URL: http://localhost:${WEB_PORT:-3001} # Habilitado para NestJS en el envio de correos
     volumes:
       - ./web:/app
       - ./shared:/shared    #paquete de schemas compartidos
-      #- /app/node_modules # Igual que en API, protege dependencias nativas
+      - /app/node_modules # Igual que en API, protege dependencias nativas
     networks:
       - sf_network
     # El healthcheck en Vite de dev no es estrictamente necesario, pero lo mantenemos con start_period

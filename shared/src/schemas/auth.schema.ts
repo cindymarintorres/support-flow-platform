@@ -13,9 +13,6 @@ export const ResetPasswordSchema = z.object({
     token: z.string().min(1),
     password: z.string().min(6),
     confirmPassword: z.string(),
-}).refine(data => data.password === data.confirmPassword, {
-    path: ['confirmPassword'],
-    error: 'Las contraseñas no coinciden',
 });
 
 export type LoginDto = z.infer<typeof LoginSchema>;
