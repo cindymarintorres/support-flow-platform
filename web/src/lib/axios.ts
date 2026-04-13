@@ -1,9 +1,8 @@
 import axios from 'axios'
-import { useAuthStore } from '../store/authStore' // Ajusta la ruta a tu store
+import { env } from '@/config/env';
+import { useAuthStore } from '../store/authStore'
 
-// Si existe la variable VITE_API_URL, la usa (Ideal para Producción/Vercel).
-// Si no existe, usa '/api' (Ideal para Desarrollo local con Vite Proxy).
-const baseURL = import.meta.env.VITE_API_URL || '/api';
+const baseURL = env.VITE_API_URL;
 
 const api = axios.create({
   baseURL,
@@ -14,11 +13,11 @@ api.interceptors.request.use((config) => {
   //MEJORA: Usamos getState() de Zustand en lugar de parsear localStorage.
   // Es más seguro, rápido y confía en la memoria de la app.
   const token = useAuthStore.getState().token
-  
+
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
-  
+
   return config
 })
 
@@ -36,10 +35,10 @@ api.interceptors.response.use(
       // Si es 401 (No Autorizado / Token expirado o inválido)
       if (status === 401) {
         console.warn('Sesión expirada. Cerrando sesión automáticamente...')
-        
+
         // Ejecutamos la función logout de tu store
         useAuthStore.getState().logout()
-        
+
         // Nota: Al hacer logout(), Zustand limpia el estado y el localStorage.
         // Tu <ProtectedRoute /> reaccionará a esto y enviará al usuario a /login.
       }
