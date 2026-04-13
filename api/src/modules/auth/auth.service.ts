@@ -5,6 +5,7 @@ import * as crypto from 'crypto';
 import { UsersService } from '../users/users.service';
 import { LoginDto, ForgotPasswordDto, ResetPasswordDto } from './schemas/auth.schema';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { MailService } from 'src/mail/mail.service';
 
 type JwtPayload = {
   sub: string;
@@ -30,7 +31,7 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly prisma: PrismaService,
-    //private readonly mailService: MailService,
+    private readonly mailService: MailService,
   ) { }
 
   // ─── Validate User ───────────────────────────────
@@ -93,7 +94,8 @@ export class AuthService {
       }
     })
 
-    //await this.mailService.sendPasswordReset(user.email, token)
+    // Enviar email — cae en Mailpit, no al usuario real
+    await this.mailService.sendPasswordReset(user.email, token)
 
     return { message: 'Si el correo existe, recibirás un email' }
   }
