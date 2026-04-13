@@ -20,6 +20,7 @@ export const LoginForm = () => {
   const { register, handleSubmit, formState: { errors } } = useForm<LoginDto>({
     resolver: zodResolver(LoginSchema),
     defaultValues: { email: '', password: '' },
+    mode: 'onBlur',
   })
 
   const onSubmit = (data: LoginDto) => {

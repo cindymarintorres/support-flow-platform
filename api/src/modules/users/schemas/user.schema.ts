@@ -1,17 +1,10 @@
 import { z } from 'zod';
+import { BaseUpdateUserSchema, BaseUserSchema } from '@support-flow/shared';
 
-import { UserRoleSchema } from 'src/common/enums/user-role.enum';
+export const CreateUserSchema = BaseUserSchema;
 
-export const CreateUserSchema = z.object({
-  name: z.string().min(3),
-  email: z.email(),
-  password: z.string().min(6),
-  role: UserRoleSchema,
-});
-
-export const UpdateUserSchema = CreateUserSchema.partial().omit({ email: true });
+// Nest omite email del update — tiene su propio endpoint
+export const UpdateUserSchema = BaseUpdateUserSchema.omit({ email: true });
 
 export type CreateUserDto = z.infer<typeof CreateUserSchema>;
 export type UpdateUserDto = z.infer<typeof UpdateUserSchema>;
-
-

@@ -1,6 +1,6 @@
 import { Navigate, Outlet } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
-import { UserRole } from '../../constants/roles'
+import { UserRole } from '@support-flow/shared'
 import { ROUTES } from '../../constants/routes'
 
 type Props = {

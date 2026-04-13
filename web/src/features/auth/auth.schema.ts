@@ -1,37 +1,40 @@
 import { z } from 'zod';
-import { UserSchema } from '../users/user.schema'; // Importamos el usuario base
+import {
+  LoginSchema as BaseLoginSchema,
+  ForgotPasswordSchema as BaseForgotPasswordSchema,
+  ResetPasswordSchema as BaseResetPasswordSchema,
+} from '@support-flow/shared';
+import { UserEntitySchema } from '@support-flow/shared';
 
-// ---Esquema para iniciar sesión ---
-export const LoginSchema = z.object({
-  email: z.email('Correo inválido').min(1, 'El correo es obligatorio'),
+// Extendemos con mensajes de UX
+export const LoginSchema = BaseLoginSchema.extend({
+  email: z.email({
+    error: (issue) =>
+      issue.input === '' || issue.input === undefined
+        ? 'El correo es obligatorio'
+        : 'Correo inválido'
+  }),
   password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
 });
 
-// ---Esquema para solicitar recuperación de contraseña ---
-export const ForgotPasswordSchema = z.object({
-  email: z.email('Correo inválido'),
+export const ForgotPasswordSchema = BaseForgotPasswordSchema.extend({
+  email: z.email({
+    error: (issue) =>
+      issue.input === '' || issue.input === undefined
+        ? 'El correo es obligatorio'
+        : 'Correo inválido'
+  }),
 });
 
-// ---Esquema para restablecer contraseña ---
-export const ResetPasswordSchema = z.object({
-  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
-  confirmPassword: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
-})
-  // .refine() valida datos cruzados en el formulario
-  .refine((data) => data.password === data.confirmPassword, {
-    message: 'Las contraseñas no coinciden',
-    path: ['confirmPassword'], // Esto hace que el error aparezca debajo del input de "confirmPassword"
-  });
+// React omite token — viene por URL params, no del formulario
+export const ResetPasswordSchema = BaseResetPasswordSchema.omit({ token: true });
 
-// ---Esquema para respuesta de autenticación ---
 export const AuthResponseSchema = z.object({
-  user: UserSchema, // ¡Reutilizamos la entidad del otro feature!
+  user: UserEntitySchema,
   token: z.string(),
 });
 
-
-// ---Tipos (DTOs) ---
 export type LoginDto = z.infer<typeof LoginSchema>;
 export type ForgotPasswordDto = z.infer<typeof ForgotPasswordSchema>;
 export type ResetPasswordDto = z.infer<typeof ResetPasswordSchema>;
-export type AuthResponseDto = z.infer<typeof AuthResponseSchema>
+export type AuthResponseDto = z.infer<typeof AuthResponseSchema>;
