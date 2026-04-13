@@ -1,4 +1,4 @@
-# SupportFlow Platform
+# 🎯 SupportFlow Platform
 
 **Plataforma moderna de gestión de soporte técnico** inspirada en herramientas empresariales como ServiceNow y Jira Service Management.
 
@@ -6,7 +6,7 @@
 
 ---
 
-## Por qué este stack
+## 🧠 Por qué este stack
 
 Cada decisión tecnológica tiene una razón de ser concreta dentro del dominio del problema.
 
@@ -26,10 +26,69 @@ Cada decisión tecnológica tiene una razón de ser concreta dentro del dominio 
 
 ---
 
-## Estructura del proyecto
+## 📦 Paquete compartido (`shared/`)
+
+El proyecto incluye un paquete npm local `@support-flow/shared` que actúa como **única fuente de verdad** para schemas y tipos compartidos entre el backend y el frontend.
+
+### ¿Por qué existe?
+
+`api/` y `web/` necesitan validar los mismos datos — pero en momentos distintos y con responsabilidades distintas:
+
+- **React** valida lo que el usuario escribe en el formulario, antes de enviar el request. Es para mostrar errores en pantalla.
+- **NestJS** valida el body del HTTP request cuando llega al servidor, sin importar el origen. Es la última línea de defensa.
+
+Sin un paquete compartido, las reglas de validación (longitud mínima de campos, formato de email, roles válidos) se duplican manualmente en ambos lados y pueden desincronizarse.
+
+### ¿Qué contiene?
+
+```
+shared/src/schemas/
+  user-role.schema.ts   # UserRoleSchema, USER_ROLES, UserRole type
+  user.schema.ts        # BaseUserSchema, BaseUpdateUserSchema, UserEntitySchema
+  auth.schema.ts        # LoginSchema, ForgotPasswordSchema, ResetPasswordSchema
+```
+
+### ¿Cómo se usa?
+
+Cada lado importa los schemas base y los extiende según sus necesidades:
+
+```typescript
+// NestJS — omite email del update, tiene su propio endpoint para eso
+import { BaseUpdateUserSchema } from "@support-flow/shared";
+export const UpdateUserSchema = BaseUpdateUserSchema.omit({ email: true });
+
+// React — agrega mensajes de UX y omite token (viene por URL, no del form)
+import { ResetPasswordSchema } from "@support-flow/shared";
+export const ResetPasswordFormSchema = ResetPasswordSchema.omit({
+  token: true,
+});
+```
+
+### Resolución en Docker
+
+El shared se monta como volumen en ambos contenedores y se copia durante el build:
+
+```
+/shared   ← disponible en api y web como ../shared
+```
+
+Esto permite hot-reload del shared durante desarrollo — un cambio en `shared/` se refleja sin reconstruir los contenedores.
+
+---
+
+## 🗂️ Estructura del proyecto
 
 ```
 supportflow/
+├── shared/                     # Paquete npm local compartido
+│   ├── package.json            # name: @support-flow/shared
+│   └── src/
+│       ├── index.ts
+│       └── schemas/            # Schemas Zod base (sin mensajes de UX)
+│           ├── user-role.schema.ts
+│           ├── user.schema.ts
+│           └── auth.schema.ts
+│
 ├── api/                        # Backend NestJS
 │   ├── src/
 │   │   ├── modules/            # Módulos de dominio (tickets, users, auth, …)
@@ -39,7 +98,6 @@ supportflow/
 │   ├── prisma/
 │   │   ├── schema.prisma       # Fuente de verdad del modelo de datos
 │   └── └── migrations/
-|
 │
 ├── web/                        # Frontend React
 │   ├── src/
@@ -47,7 +105,6 @@ supportflow/
 │   │   ├── components/         # Componentes compartidos
 │   │   ├── hooks/              # Custom hooks (React Query, WebSocket)
 │   └── └── main.tsx
-|
 │
 ├── docker/                     # Configuraciones adicionales de contenedores
 │   ├── api/                    # Dockerfile del API
@@ -70,7 +127,7 @@ supportflow/
 
 ---
 
-## Requisitos previos
+## ✅ Requisitos previos
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (incluye Docker Compose v2)
 - Node.js 20+ — solo necesario si deseas correr servicios fuera de Docker
@@ -85,7 +142,7 @@ node --version          # v20+
 
 ---
 
-## Levantar el proyecto
+## 🚀 Levantar el proyecto
 
 ### 1. Clonar el repositorio
 
@@ -127,7 +184,7 @@ El seed crea usuarios de prueba y categorías base. La gestión de usuarios en e
 
 ---
 
-## Verificar que todo funciona
+## 🔍 Verificar que todo funciona
 
 Una vez levantado el stack, verifica cada servicio:
 
@@ -164,7 +221,7 @@ Este flujo demuestra la integración completa: **HTTP request → job encolado e
 
 ---
 
-## Arquitectura de red (Docker)
+## 🐳 Arquitectura de red (Docker)
 
 Los servicios se comunican a través de una red interna de Docker (`sf_network`). Desde dentro de los contenedores, los servicios se referencian por **nombre de servicio**, no por `localhost`:
 
@@ -178,7 +235,7 @@ Los puertos expuestos en `localhost` son exclusivamente para acceso del desarrol
 
 ---
 
-## Comandos útiles durante desarrollo
+## 🛠️ Comandos útiles durante desarrollo
 
 ```bash
 # Ver logs de un servicio específico
@@ -199,7 +256,7 @@ docker compose down -v
 
 ---
 
-## Modelo de dominio (resumen)
+## 🗺️ Modelo de dominio (resumen)
 
 ```
 User ──────────┐
@@ -213,6 +270,6 @@ Los tickets transitan por estados definidos: `OPEN → IN_PROGRESS → RESOLVED 
 
 ---
 
-## Estado del proyecto
+## 📋 Estado del proyecto
 
 Este proyecto está en desarrollo activo como parte de un portafolio de ingeniería de software. La arquitectura, decisiones de diseño y progreso de implementación están documentados en el historial de commits.
