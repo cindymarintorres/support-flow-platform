@@ -27,7 +27,12 @@ export const ForgotPasswordSchema = BaseForgotPasswordSchema.extend({
 });
 
 // React omite token — viene por URL params, no del formulario
-export const ResetPasswordSchema = BaseResetPasswordSchema.omit({ token: true });
+export const ResetPasswordSchema = BaseResetPasswordSchema
+  .omit({ token: true })
+  .refine(data => data.password === data.confirmPassword, {
+    path: ['confirmPassword'],
+    error: 'Las contraseñas no coinciden',
+  });
 
 export const AuthResponseSchema = z.object({
   user: UserEntitySchema,
