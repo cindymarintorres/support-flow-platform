@@ -1,22 +1,22 @@
-import { 
-  Body, 
-  Controller, 
-  Get, 
-  Post, 
-  UseGuards, 
-  Request, 
-  HttpCode, 
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  UseGuards,
+  Request,
+  HttpCode,
   HttpStatus,
-  UsePipes
+  UsePipes,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginSchema, LoginDto } from './schemas/auth.schema';
+import { LoginSchema, LoginDto, ForgotPasswordSchema, ForgotPasswordDto, ResetPasswordSchema, ResetPasswordDto } from './schemas/auth.schema';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) { }
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
@@ -31,12 +31,26 @@ export class AuthController {
   async logout() {
     // Para JWT, el logout suele manejarse en el cliente descartando el token.
     // Si se requiere invalidación en el servidor, se puede usar Redis para blacklisting.
-    return { message: 'Logged out successfully' };
+    return { message: 'Cerrado sesión correctamente' };
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   getProfile(@Request() req) {
     return req.user;
+  }
+
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  @UsePipes(new ZodValidationPipe(ForgotPasswordSchema))
+  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+    return this.authService.forgotPassword(forgotPasswordDto)
+  }
+
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  @UsePipes(new ZodValidationPipe(ResetPasswordSchema))
+  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+    return this.authService.resetPassword(resetPasswordDto)
   }
 }

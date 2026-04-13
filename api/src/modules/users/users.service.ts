@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { CreateUserDto, UpdateUserDto } from './schemas/user.schema';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async findAll() {
     return this.prisma.user.findMany({
@@ -85,5 +85,12 @@ export class UsersService {
 
     await this.prisma.user.delete({ where: { id } });
     return { success: true };
+  }
+
+  async updatePassword(userId: string, hashedPassword: string) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { password: hashedPassword },
+    })
   }
 }
