@@ -2,9 +2,9 @@ import { z } from 'zod';
 import { UserRoleSchema } from './user-role.schema';
 
 export const BaseUserSchema = z.object({
-    name: z.string().min(3),
-    email: z.email(),
-    password: z.string().min(6),
+    name: z.string().min(3, { message: 'El nombre debe tener al menos 3 caracteres' }),
+    email: z.email({ message: 'Correo electrónico inválido' }),
+    password: z.string().min(6, { message: 'La contraseña debe tener al menos 6 caracteres' }),
     role: UserRoleSchema,
 });
 

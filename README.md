@@ -276,6 +276,16 @@ Los tickets transitan por estados definidos: `OPEN → IN_PROGRESS → RESOLVED 
 
 ---
 
+## 📖 Documentación y Resolución de Errores
+
+Toda la documentación técnica profunda y guías de desarrollo viven en el directorio `docs/`:
+
+- **[Guía Diaria (Troubleshooting & Workflow)](docs/GUIA_DESARROLLO.md):** Contiene la hoja de trucos exacta para corregir errores de tipado (`ts`), problemas de módulos no encontrados, resincronizar `node_modules` en contenedores, compilar la librería `shared` y lidiar con los comandos internos de Prisma. ¡Léelo si algo falla en tu entorno local!
+- **[SupportFlow Backend Blueprint](docs/SupportFlow%20Backend%20Blueprint%20(NestJS)%20.md):** Manual arquitectónico del API NestJS.
+- **[SupportFlow Frontend Blueprint](docs/SupportFlow%20Frontend%20Blueprint%20(React)%20.md):** Diseño conceptual de la arquitectura React SPA.
+
+---
+
 ## 📋 Estado del proyecto
 
 Este proyecto está en desarrollo activo como parte de un portafolio de ingeniería de software. La arquitectura, decisiones de diseño y progreso de implementación están documentados en el historial de commits.
