@@ -64,15 +64,12 @@ export const ResetPasswordFormSchema = ResetPasswordSchema.omit({
 });
 ```
 
-### Resolución en Docker
+### Resolución en Docker (Librería Real)
 
-El shared se monta como volumen en ambos contenedores y se copia durante el build:
+Para garantizar consistencia y evitar errores de compilación comunes de monorepos sin herramientas externas (como Nx), el paquete `shared` está configurado nativamente como una **librería real** (`main: "dist/index.js"`).
 
-```
-/shared   ← disponible en api y web como ../shared
-```
-
-Esto permite hot-reload del shared durante desarrollo — un cambio en `shared/` se refleja sin reconstruir los contenedores.
+1. **Compilación Transparente:** Tu archivo `docker-compose.yml` pre-ejecuta `cd /shared && npm run build` de manera automática al inicializar los servicios.
+2. **¿Por qué?**: En Docker Compose, al montar tu carpeta cruda `./shared` como volumen de desarrollo en `- ./shared:/shared`, se sobrescribe silenciosamente el `/shared` construido por el Dockerfile original. Volver a compilar en tiempo de ejecución de Docker asegura que cualquier tipo nuevo en `shared` que hayas guardado localmente termine disponible en `dist/` para inyectarlo sanamente al backend sin re-construir el contenedor.
 
 ---
 
@@ -162,25 +159,34 @@ El archivo `.env.example` contiene todos los valores necesarios para desarrollo 
 ### 3. Levantar la infraestructura completa
 
 ```bash
-docker compose up --build
+docker compose up -d --build --renew-anon-volumes
 ```
 
 Este comando:
 
-1. Construye las imágenes de `api` y `web`
-2. Levanta PostgreSQL, Redis, Mailpit y MockServer
-3. Ejecuta las migraciones de Prisma automáticamente
-4. Inicia el API y el frontend
+1. Construye las imágenes de `api` y `web`.
+2. Al incluir `--renew-anon-volumes`, reconstruye inteligentemente las librerías `node_modules` de contenedores impidiendo el colapso de discrepancia entre sistema local vs Alpine-Linux.
+3. Levanta PostgreSQL, Redis, Mailpit y MockServer.
+4. Compila eficientemente el paquete en `/shared/dist`.
+5. Abre y corre puertos.
 
-> En la primera ejecución, Docker descargará las imágenes base. Las ejecuciones posteriores usan caché y son significativamente más rápidas.
+### 4. Primera ejecución (Creación de Base de Datos y Seed)
 
-### 4. Cargar datos iniciales (seed)
+Si es tu **primera vez iniciando** y entras al explorador de *Prisma Studio*, te encontrarás con una plataforma **vacía** o marcando un error, dado que el volumen nativo de la base de datos en Docker nace totalmente en blanco (sin tablas ni relaciones). 
+
+Por ello, una vez Docker termine de ejecutar el paso 3, **debes sincronizar tablas y cargar usuarios**.
 
 ```bash
-docker compose exec api npx ts-node scripts/seed.ts
+# 1. Impactar las tablas y generar el cliente nativo interno
+docker compose exec api npx prisma db push
+
+# 2. Cargar los usuarios demo
+docker compose exec api npx prisma db seed
 ```
 
-El seed crea usuarios de prueba y categorías base. La gestión de usuarios en el MVP es exclusivamente a través de seed — no existe UI de administración de usuarios en esta fase.
+El script de seed importa las contraseñas internamente usando `bcryptjs`.
+
+> **💡 Tip sobre Encriptación y Docker:** En todo el proyecto se utiliza `bcryptjs` en lugar del popular paquete `bcrypt`. El motivo es que `bcrypt` nativo usa adaptadores C++ pesados (node-gyp) que entran en conflicto y colapsan la instalación cuando se compilan contenedores basados en `alpine` (imágenes de Linux utraligeras). `bcryptjs` está escrito puramente en Javascript previniendo errores durante el `docker compose up --build`.
 
 ---
 

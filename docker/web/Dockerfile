@@ -6,7 +6,7 @@ WORKDIR /app
 
 # Copiamos shared primero, paquetes compartidos de schemas
 COPY shared/ /shared/
-RUN cd /shared && npm install
+RUN cd /shared && npm install && npm run build
 
 COPY web/package*.json ./
 

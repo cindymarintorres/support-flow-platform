@@ -43,6 +43,7 @@ services:
       dockerfile: ./docker/api/Dockerfile
     container_name: sf_api
     restart: unless-stopped
+    command: sh -c "cd /shared && npm run build && cd /app && npx prisma generate && npm run start:dev"
     depends_on:
       postgres:
         condition: service_healthy
@@ -64,7 +65,7 @@ services:
     volumes:
       - ./api:/app
       - ./shared:/shared    # Paquete de schemas compartidos
-      - /app/dist         # Evita conflictos de compilación con tu host
+      #- /app/dist         # Evita conflictos de compilación con tu host
       - /app/node_modules # Evita sobreescribir los módulos de Linux con los de tu host (importante para bcrypt/prisma)
     networks:
       - sf_network

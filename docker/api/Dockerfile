@@ -8,7 +8,7 @@ WORKDIR /app
 
 # Copiamos shared primero, paquetes compartidos de schemas
 COPY shared/ /shared/
-RUN cd /shared && npm install
+RUN cd /shared && npm install && npm run build
 
 COPY api/package*.json ./
 COPY api/prisma ./prisma/

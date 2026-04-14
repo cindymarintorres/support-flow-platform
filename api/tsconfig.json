@@ -17,10 +17,7 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
-    "noFallthroughCasesInSwitch": false,
-    "paths": {
-      "@support-flow/shared": ["../shared/src/index.ts"]
-    } 
+    "noFallthroughCasesInSwitch": false
   },
   "ts-node": {
     "compilerOptions": {

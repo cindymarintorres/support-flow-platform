@@ -13,7 +13,7 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),
-        "@support-flow/shared": path.resolve(__dirname, "../shared/src/index.ts"), //paquete de schemas compartidos
+        "@support-flow/shared": path.resolve(__dirname, "../shared/src/index.ts")
       },
     },
     server: {
