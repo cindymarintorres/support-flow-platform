@@ -89,7 +89,7 @@ services:
       - "${WEB_PORT:-3001}:5173"
     environment:
       NODE_ENV: ${NODE_ENV:-development}
-      VITE_API_URL: http://localhost:${API_PORT:-3000} # Habilitado para que Vite sepa dónde hablar
+      VITE_API_URL: http://localhost:${API_PORT:-3000}/api # Habilitado para que Vite sepa dónde hablar
     volumes:
       - ./web:/app
       - ./shared:/shared    #paquete de schemas compartidos

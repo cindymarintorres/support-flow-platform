@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { UserRole } from '../constants/roles'
+import { UserRole } from '@support-flow/shared'
 
 type User = {
   id: string
