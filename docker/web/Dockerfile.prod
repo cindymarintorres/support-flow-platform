@@ -1,0 +1,41 @@
+# Dockerfile.prod — Frontend (React + Vite)
+# Multi-stage build
+
+# --- ETAPA 1: BUILD ---
+FROM cemarin/react-vite-base:20-alpine AS builder
+
+WORKDIR /app
+
+# 1. Compilar paquete compartido
+COPY shared/ /shared/
+RUN cd /shared && npm install && npm run build
+
+# 2. Instalar dependencias de Web
+COPY web/package*.json ./web/
+RUN cd web && npm install --legacy-peer-deps
+
+# 3. Copiar código web
+COPY web/ ./web/
+
+# Al compilar Vite, necesita saber la URL de la API (pasada desde el docker-compose)
+ARG VITE_API_URL
+ENV VITE_API_URL=${VITE_API_URL}
+
+# 4. Generar Build de producción estática en la carpeta 'dist'
+RUN cd web && npm run build
+
+# --- ETAPA 2: PRODUCCIÓN (Servidor de estáticos) ---
+FROM node:20-alpine
+
+# Instalamos un paquete ligero para servir archivos estáticos (o podrías usar Nginx aquí)
+RUN npm install -g serve
+
+WORKDIR /app
+
+# Traemos la carpeta dist generada
+COPY --from=builder /app/web/dist ./dist
+
+EXPOSE 5173
+
+# Servimos los estáticos con fallback a index.html (ideal para React Router)
+CMD ["serve", "-s", "dist", "-l", "5173"]

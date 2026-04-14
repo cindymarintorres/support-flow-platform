@@ -1,0 +1,88 @@
+# docker-compose.prod.yml — SupportFlow (Optimizado para Producción)
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: sf_postgres_prod
+    restart: always # En prod queremos que intente levantar si se cae
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-support_flow}
+    ports:
+      - "${DB_PORT:-3002}:5432"
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+    networks:
+      - sf_network_prod
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-support_flow}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: sf_redis_prod
+    restart: always
+    ports:
+      - "${REDIS_PORT:-3003}:6379"
+    networks:
+      - sf_network_prod
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - redis_data_prod:/data  
+
+  api:
+    build:
+      context: .
+      dockerfile: ./docker/api/Dockerfile.prod
+    container_name: sf_api_prod
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "${API_PORT:-3000}:3000"
+    environment:
+      # FORZAMOS PRODUCCIÓN
+      NODE_ENV: production
+      PORT: ${API_PORT:-3000}
+      DATABASE_URL: ${DATABASE_URL_DOCKER}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET}
+      FRONTEND_URL: ${FRONTEND_URL_PROD}
+    networks:
+      - sf_network_prod
+
+  web:
+    build:
+      context: .
+      dockerfile: ./docker/web/Dockerfile.prod
+      args:
+        # Se requiere pasar el valor a Vite durante la compilación del build
+        VITE_API_URL: ${API_URL_PROD}
+    container_name: sf_web_prod
+    restart: always
+    depends_on:
+      - api
+    ports:
+      # Podrías mapearlo al 80 localmente para simular un servidor real
+      - "${WEB_PORT:-80}:5173"
+    networks:
+      - sf_network_prod
+
+networks:
+  sf_network_prod:
+    driver: bridge
+
+volumes:
+  postgres_data_prod:
+  redis_data_prod:
